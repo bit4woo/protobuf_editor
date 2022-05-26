@@ -99,7 +99,10 @@ class ProtobufHelperTab(IMessageEditorTab):
             self.txtInput.setEditable(False)
 
         try:
-            res = self.extender.helpers.analyzeResponse(content)
+            if isRequest:
+                res = self.extender.helpers.analyzeRequest(content)
+            else:
+                res = self.extender.helpers.analyzeResponse(content)
             self.httpHeaders = res.getHeaders() #remember headers
 
             data = content[res.getBodyOffset():]
@@ -123,7 +126,10 @@ class ProtobufHelperTab(IMessageEditorTab):
 
             try:
                 content = self.txtInput.getText()
-                res = self.extender.helpers.analyzeResponse(content)
+                try:
+                    res = self.extender.helpers.analyzeResponse(content)
+                except:
+                    res = self.extender.helpers.analyzeResponse(content)
                 self.httpHeaders = res.getHeaders()  # remember headers
 
                 body = content[res.getBodyOffset():]
