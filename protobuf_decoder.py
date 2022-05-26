@@ -62,10 +62,6 @@ class ProtobufHelperTab(IMessageEditorTab):
         self.editable = editable
         self.controller = controller
 
-        # create an instance of Burp's text editor, to display our deserialized data
-        self.txtInput = extender.callbacks.createTextEditor()
-        self.txtInput.setEditable(editable)
-
         self.httpHeaders = None
         self.body = None
         self.content = None
@@ -77,11 +73,15 @@ class ProtobufHelperTab(IMessageEditorTab):
         return "Protobuf"
         
     def getUiComponent(self):
+        # create an instance of Burp's text editor, to display our deserialized data
+        self.txtInput = self.extender.callbacks.createTextEditor()
+        self.txtInput.setEditable(self.editable)
         return self.txtInput.getComponent()
     
     def isEnabled(self, content, isRequest):
-
-        return True
+        if self.is_protobuf(content):
+            return True
+        return False
 
     def isModified(self):
         return self.txtInput.isTextModified()
@@ -97,7 +97,7 @@ class ProtobufHelperTab(IMessageEditorTab):
             # clear our display
             self.txtInput.setText(None)
             self.txtInput.setEditable(False)
-
+            return
         try:
             if isRequest:
                 res = self.extender.helpers.analyzeRequest(content)
@@ -161,7 +161,9 @@ class ProtobufHelperTab(IMessageEditorTab):
         res = self.extender.helpers.analyzeResponse(content)
         Headers = res.getHeaders()  # remember headers
         for header in Headers:
-            if str.startswith(str.lower(header),"content-type:"):
-                if "proto" in str.lower(header):
+            headerstr = header.encode('ascii', 'ignore')
+            headerstr = str.lower(headerstr)
+            if str.startswith(headerstr,"content-type:"):
+                if "proto" in headerstr:
                     return True
         return False
