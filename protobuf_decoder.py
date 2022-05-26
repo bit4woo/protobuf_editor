@@ -150,3 +150,12 @@ class ProtobufHelperTab(IMessageEditorTab):
         else:
             return self.currentMessage
 
+    def is_protobuf(self,content):
+        types = "application/proto|application/x-protobuf|application/x-protobuffer|application/x-protobuffer; charset=utf-8|application/octet-stream".split("|")
+        res = self.extender.helpers.analyzeResponse(content)
+        Headers = res.getHeaders()  # remember headers
+        for header in Headers:
+            if str.startswith(str.lower(header),"content-type:"):
+                if "proto" in str.lower(header):
+                    return True
+        return False
